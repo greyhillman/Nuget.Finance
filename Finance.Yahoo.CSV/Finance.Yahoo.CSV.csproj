@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Finance.RBC.CSV</PackageId>
+    <PackageId>Finance.Yahoo.CSV</PackageId>
     <Version>0.1.0</Version>
   </PropertyGroup>
 
