@@ -15,8 +15,7 @@ namespace Finance.RBC
         public string ChequeNumber { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string SecondaryDescription { get; set; } = string.Empty;
-        public decimal? CAD { get; set; } = null;
-        public decimal? USD { get; set; } = null;
+        public Amount Amount { get; set; } = new();
 
         public Statement(DateTime date)
         {
@@ -34,8 +33,7 @@ namespace Finance.RBC
             builder.AppendLine($"Cheque Number: {ChequeNumber}");
             builder.AppendLine($"Description: {Description}");
             builder.AppendLine($"Description 2: {SecondaryDescription}");
-            builder.AppendLine($"CAD: {CAD}");
-            builder.AppendLine($"USD: {USD}");
+            builder.AppendLine($"Amount: {Amount}");
 
             return builder.ToString();
         }

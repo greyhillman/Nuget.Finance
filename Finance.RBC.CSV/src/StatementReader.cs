@@ -33,8 +33,15 @@ namespace Finance.RBC.CSV
                     var chequeNumber = csv.GetField("Cheque Number");
                     var description = csv.GetField("Description 1");
                     var secondaryDescription = csv.GetField("Description 2");
-                    var cad = csv.GetField<decimal?>("CAD$");
-                    var usd = csv.GetField<decimal?>("USD$");
+
+                    var amount = new Amount();
+                    for (var column = 6; column < csv.HeaderRecord!.Length; column++)
+                    {
+                        var commodity = csv.HeaderRecord![column];
+                        var quantity = csv.GetField<decimal?>(column) ?? 0;
+
+                        amount.Add(commodity, quantity);
+                    }
 
                     yield return new Statement(date)
                     {
@@ -43,8 +50,7 @@ namespace Finance.RBC.CSV
                         ChequeNumber = chequeNumber?.Trim() ?? string.Empty,
                         Description = description?.Trim() ?? string.Empty,
                         SecondaryDescription = secondaryDescription?.Trim() ?? string.Empty,
-                        CAD = cad,
-                        USD = usd,
+                        Amount = amount,
                     };
                 }
             }

@@ -12,13 +12,22 @@ namespace Finance.RBC.CSV
 {
     public class StatementWriter
     {
-        public async Task Write(TextWriter writer, IAsyncEnumerable<Statement> transactions)
+        public async Task Write(TextWriter writer, Statement[] statements)
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 // Let caller handle the writer/stream
                 LeaveOpen = true,
             };
+
+            var commodities = new HashSet<string>();
+            foreach (var statement in statements)
+            {
+                foreach (var commodity in statement.Amount.Commodities)
+                {
+                    commodities.Add(commodity);
+                }
+            }
 
             using (var csv = new CsvWriter(writer, config))
             {
@@ -28,21 +37,29 @@ namespace Finance.RBC.CSV
                 csv.WriteField("Cheque Number");
                 csv.WriteField("Description 1");
                 csv.WriteField("Description 2");
-                csv.WriteField("CAD$");
-                csv.WriteField("USD$");
+
+                foreach (var commodity in commodities)
+                {
+                    csv.WriteField(commodity);
+                }
 
                 await csv.NextRecordAsync();
 
-                await foreach (var transaction in transactions)
+                foreach (var statement in statements)
                 {
-                    csv.WriteField(transaction.AccountType);
-                    csv.WriteField(transaction.AccountNumber);
-                    csv.WriteField(transaction.TransactionDate);
-                    csv.WriteField(transaction.ChequeNumber);
-                    csv.WriteField(transaction.Description);
-                    csv.WriteField(transaction.SecondaryDescription);
-                    csv.WriteField(transaction.CAD);
-                    csv.WriteField(transaction.USD);
+                    csv.WriteField(statement.AccountType);
+                    csv.WriteField(statement.AccountNumber);
+                    csv.WriteField(statement.TransactionDate);
+                    csv.WriteField(statement.ChequeNumber);
+                    csv.WriteField(statement.Description);
+                    csv.WriteField(statement.SecondaryDescription);
+
+                    foreach (var commodity in commodities)
+                    {
+                        var quantity = statement.Amount[commodity];
+
+                        csv.WriteField(quantity);
+                    }
 
                     await csv.NextRecordAsync();
                 }
