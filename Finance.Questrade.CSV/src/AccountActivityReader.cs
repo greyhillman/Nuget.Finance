@@ -81,6 +81,7 @@ namespace Finance.Questrade.CSV
                 "Individual RRSP" => AccountType.IndividualRRSP,
                 "Individual TFSA" => AccountType.IndividualTFSA,
                 "Individual margin" => AccountType.IndividualMargin,
+                "Individual FHSA" => AccountType.IndividualFHSA,
                 _ => throw new NotSupportedException(value),
             };
         }

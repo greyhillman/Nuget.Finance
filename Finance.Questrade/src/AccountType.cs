@@ -5,5 +5,6 @@ namespace Finance.Questrade
         IndividualRRSP,
         IndividualTFSA,
         IndividualMargin,
+        IndividualFHSA,
     }
 }
