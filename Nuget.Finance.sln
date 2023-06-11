@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance.Questrade.CSV", "Fi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance.Yahoo.CSV", "Finance.Yahoo.CSV\Finance.Yahoo.CSV.csproj", "{A7481AA0-E498-46A2-8DE4-5DCF0EBF03E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance.Accounting.JSON", "Finance.Accounting.JSON\Finance.Accounting.JSON.csproj", "{D31DC0AC-85D6-42E4-91AC-47F0246B9853}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{A7481AA0-E498-46A2-8DE4-5DCF0EBF03E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7481AA0-E498-46A2-8DE4-5DCF0EBF03E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7481AA0-E498-46A2-8DE4-5DCF0EBF03E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D31DC0AC-85D6-42E4-91AC-47F0246B9853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D31DC0AC-85D6-42E4-91AC-47F0246B9853}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D31DC0AC-85D6-42E4-91AC-47F0246B9853}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D31DC0AC-85D6-42E4-91AC-47F0246B9853}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

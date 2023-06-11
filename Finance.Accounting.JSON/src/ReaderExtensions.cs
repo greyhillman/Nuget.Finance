@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Finance.JSON
 {
-    public static class JsonReaderExtensions
+    internal static class JsonReaderExtensions
     {
         public static void AssertStartArray(this Utf8JsonReader reader)
         {
