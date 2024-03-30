@@ -1,10 +1,23 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Finance
 {
-    public record Amount : IEquatable<Amount>
+    public record SingleAmount
+    {
+        internal SingleAmount(string commodity, decimal quantity)
+        {
+            Commodity = commodity;
+            Quantity = quantity;
+        }
+
+        public string Commodity { get; private set; }
+        public decimal Quantity { get; private set; }
+    }
+
+    public record Amount : IEquatable<Amount>, IEnumerable<SingleAmount>
     {
         private readonly Dictionary<string, decimal> _quantities;
 
@@ -54,7 +67,7 @@ namespace Finance
             get
             {
                 var result = true;
-                
+
                 foreach (var pair in _quantities)
                 {
                     result = result && pair.Value > 0;
@@ -86,7 +99,7 @@ namespace Finance
             {
                 result = result && pair.Value == other[pair.Key];
             }
-            
+
             return result;
         }
 
@@ -154,8 +167,21 @@ namespace Finance
             {
                 builder.AppendLine($"{pair.Key} {pair.Value}");
             }
-            
+
             return builder.ToString();
+        }
+
+        public IEnumerator<SingleAmount> GetEnumerator()
+        {
+            foreach (var pair in _quantities)
+            {
+                yield return new SingleAmount(pair.Key, pair.Value);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
         }
     }
 }
