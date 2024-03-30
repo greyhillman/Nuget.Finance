@@ -1,11 +1,14 @@
 using System.Collections.Generic;
-using System.Text;
+using System.Collections.ObjectModel;
+using System.Net.Http.Headers;
 
 namespace Finance
 {
     public class Balance
     {
         private readonly DefaultDictionary<Account, Amount> _lookup;
+
+        public ICollection<Account> Accounts => _lookup.Keys;
 
         public Balance()
         {
@@ -21,11 +24,14 @@ namespace Finance
             }
         }
 
-        public ICollection<Account> Accounts => _lookup.Keys;
-
         public void Add(Account account, Amount amount)
         {
             _lookup[account] += amount;
+
+            if (account.Parent != account)
+            {
+                Add(account.Parent, amount);
+            }
         }
 
         public Amount this[Account account]
@@ -33,19 +39,18 @@ namespace Finance
             get => _lookup[account];
         }
 
-        public Balance Under(Account parent)
+        public static Balance operator +(Balance left, Balance right)
         {
-            var balance = new Balance();
+            var result = new Balance(left);
 
-            foreach (var entry in _lookup)
+            foreach (var account in right.Accounts)
             {
-                if (entry.Key.IsUnder(parent))
-                {
-                    balance._lookup.Add(entry);
-                }
+                var amount = right[account];
+
+                result.Add(account, amount);
             }
 
-            return balance;
+            return result;
         }
     }
 }

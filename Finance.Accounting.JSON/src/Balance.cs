@@ -30,7 +30,16 @@ namespace Finance.JSON
                 var amount = _amountConverter.Read(ref reader, typeof(Amount), options);
 
                 balance.Add(account, amount);
+
+                // Avoid double counting parent amounts
+                while (account.Parent != account)
+                {
+                    balance.Add(account.Parent, -amount);
+
+                    account = account.Parent;
+                }
             }
+
             reader.AssertEndObject();
 
             return balance;
