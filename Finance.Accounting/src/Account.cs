@@ -18,6 +18,8 @@ namespace Finance
 
         public string[] Branch => _branch;
 
+        public int Depth => _branch.Length;
+
         public Account Parent {
             get {
                 if (_branch.Length == 0) {
