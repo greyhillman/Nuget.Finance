@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace Finance
 {
@@ -15,10 +12,24 @@ namespace Finance
             {
                 throw new ArgumentException();
             }
+
             _branch = branch;
         }
 
         public string[] Branch => _branch;
+
+        public Account Parent {
+            get {
+                if (_branch.Length == 0) {
+                    return this;
+                }
+
+                var parent_length = _branch.Length - 1;
+                var parent_branch = _branch.AsSpan(0, parent_length).ToArray();
+
+                return new Account(parent_branch);
+            }
+        }
 
         public override string ToString()
         {
