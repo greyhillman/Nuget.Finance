@@ -2,30 +2,17 @@ using System.Collections.Generic;
 
 namespace Finance
 {
-    public record Price
+    public readonly record struct Price
     {
-        private readonly string _commodity;
-        private readonly Dictionary<string, decimal> _rates;
+        public string From { get; init; }
+        public string To { get; init; }
+        public decimal Rate { get; init; }
 
-        public Price(string baseCommodity)
+        public Price(string from, string to, decimal rate)
         {
-            _commodity = baseCommodity;
-            _rates = new();
-        }
-
-        public string BaseCommodity => _commodity;
-        public ICollection<string> Commodities => _rates.Keys;
-
-        public decimal this[string commodity]
-        {
-            get
-            {
-                return _rates[commodity];
-            }
-            set
-            {
-                _rates[commodity] = value;
-            }
+            From = from;
+            To = to;
+            Rate = rate;
         }
 
         public static Amount operator *(Amount amount, Price price)
@@ -34,11 +21,9 @@ namespace Finance
 
             foreach (var commodity in amount.Commodities)
             {
-                if (price._rates.ContainsKey(commodity))
+                if (commodity == price.From)
                 {
-                    var rate = price._rates[commodity];
-
-                    result.Add(price._commodity, amount[commodity] * rate);
+                    result.Add(price.To, price.Rate * amount[commodity]);
                 }
                 else
                 {
@@ -47,6 +32,10 @@ namespace Finance
             }
 
             return result;
+        }
+
+        public static Amount operator *(Price price, Amount amount) {
+            return amount * price;
         }
     }
 }

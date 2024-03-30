@@ -8,72 +8,61 @@ namespace Finance.JSON
     {
         public override Price Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            reader.AssertStartObject();
+            string from = null;
+            string to = null;
+            decimal? rate = null;
 
-            string baseCommodity = string.Empty;
-            var tempPrice = new Price(string.Empty);
+            reader.AssertStartObject();
 
             while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {
                 var propertyName = reader.GetString();
 
-                if (propertyName == "base_commodity")
+                switch (propertyName)
                 {
-                    reader.Read();
-                    baseCommodity = reader.GetString();
-                }
-                else if (propertyName == "rates")
-                {
-                    reader.Read();
-                    tempPrice = ReadRates(ref reader);
+                    case "from":
+                        reader.Read();
+                        from = reader.GetString();
+                        break;
+                    case "to":
+                        reader.Read();
+                        to = reader.GetString();
+                        break;
+                    case "rate":
+                        reader.Read();
+                        rate = reader.GetDecimal();
+                        break;
+                    default:
+                        throw new JsonException($"Unknown property: {propertyName}");
                 }
             }
 
             reader.AssertEndObject();
 
-            var result = new Price(baseCommodity);
-            foreach (var commodity in tempPrice.Commodities)
+            if (from == null)
             {
-                result[commodity] = tempPrice[commodity];
+                throw new JsonException("Need 'from' property");
+            }
+            if (to == null)
+            {
+                throw new JsonException("Need 'to' property");
+            }
+            if (rate == null)
+            {
+                throw new JsonException("Need 'rate' property");
             }
 
-            return result;
-        }
-
-        private Price ReadRates(ref Utf8JsonReader reader)
-        {
-            var tempPrice = new Price(string.Empty);
-
-            reader.AssertStartObject();
-
-            while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
-            {
-                var commodity = reader.GetString();
-                reader.Read();
-                var quantity = reader.GetDecimal();
-
-                tempPrice[commodity] = quantity;
-            }
-
-            reader.AssertEndObject();
-
-            return tempPrice;
+            return new Price(from, to, rate.Value);
         }
 
         public override void Write(Utf8JsonWriter writer, Price value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
 
-            writer.WriteString("base_commodity", value.BaseCommodity);
+            writer.WriteString("from", value.From);
+            writer.WriteString("to", value.To);
+            writer.WriteNumber("rate", value.Rate);
 
-            writer.WritePropertyName("rates");
-            writer.WriteStartObject();
-
-            foreach (var commodity in value.Commodities)
-            {
-                writer.WriteNumber(commodity, value[commodity]);
-            }
-            writer.WriteEndObject();
             writer.WriteEndObject();
         }
     }
