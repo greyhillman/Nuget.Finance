@@ -4,9 +4,15 @@ namespace Finance
 {
     public readonly struct Account : IEquatable<Account>, IComparable<Account>
     {
-        private readonly string[] _branch = Array.Empty<string>();
+        private readonly string[] _branch;
+
+        public Account()
+        {
+            _branch = Array.Empty<string>();
+        }
 
         public Account(params string[] branch)
+            : this()
         {
             if (branch == null)
             {
