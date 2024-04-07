@@ -19,11 +19,11 @@ namespace Finance
 
     public record Amount : IEquatable<Amount>, IEnumerable<SingleAmount>
     {
-        private readonly Dictionary<string, decimal> _quantities;
+        private readonly DefaultDictionary<string, decimal> _quantities;
 
         public Amount()
         {
-            _quantities = new();
+            _quantities = new(() => 0);
         }
 
         public Amount(string commodity, decimal quantity)
@@ -38,22 +38,12 @@ namespace Finance
         {
             get
             {
-                if (_quantities.TryGetValue(commodity, out var value))
-                {
-                    return value;
-                }
-
-                return 0;
+                return _quantities[commodity];
             }
         }
 
         public void Add(string commodity, decimal quantity)
         {
-            if (!_quantities.ContainsKey(commodity))
-            {
-                _quantities[commodity] = 0;
-            }
-
             _quantities[commodity] += quantity;
 
             if (_quantities[commodity] == 0)
