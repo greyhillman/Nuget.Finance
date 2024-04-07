@@ -17,7 +17,7 @@ public class PriceTest
         _amountGen =
             from length in Gen.Int[1, 10]
             from commodities in _commodityGen.ArrayUnique[length]
-                // Can't allow 0's as that's the same as not it
+            // Can't allow 0's as that's the same as not having it
             from quantities in Gen.Decimal[1, 100_000].Array[length]
             select Create(length, commodities, quantities);
     }
