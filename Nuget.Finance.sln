@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance.Yahoo.CSV", "Financ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance.Accounting.JSON", "Finance.Accounting.JSON\Finance.Accounting.JSON.csproj", "{D31DC0AC-85D6-42E4-91AC-47F0246B9853}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance.Accounting.Test", "Finance.Accounting.Test\Finance.Accounting.Test.csproj", "{0AFF9118-5ECB-4B1D-884F-5EA4DE9E196F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,5 +56,9 @@ Global
 		{D31DC0AC-85D6-42E4-91AC-47F0246B9853}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D31DC0AC-85D6-42E4-91AC-47F0246B9853}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D31DC0AC-85D6-42E4-91AC-47F0246B9853}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AFF9118-5ECB-4B1D-884F-5EA4DE9E196F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AFF9118-5ECB-4B1D-884F-5EA4DE9E196F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AFF9118-5ECB-4B1D-884F-5EA4DE9E196F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AFF9118-5ECB-4B1D-884F-5EA4DE9E196F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
