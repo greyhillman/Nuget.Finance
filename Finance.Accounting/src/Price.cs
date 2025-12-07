@@ -1,41 +1,39 @@
-using System.Collections.Generic;
+namespace Finance.Accounting;
 
-namespace Finance
+public readonly record struct Price
 {
-    public readonly record struct Price
+    public string From { get; init; }
+    public string To { get; init; }
+    public decimal Rate { get; init; }
+
+    public Price(string from, string to, decimal rate)
     {
-        public string From { get; init; }
-        public string To { get; init; }
-        public decimal Rate { get; init; }
+        From = from;
+        To = to;
+        Rate = rate;
+    }
 
-        public Price(string from, string to, decimal rate)
+    public static Amount operator *(Amount amount, Price price)
+    {
+        var result = new Amount();
+
+        foreach (var commodity in amount.Commodities)
         {
-            From = from;
-            To = to;
-            Rate = rate;
-        }
-
-        public static Amount operator *(Amount amount, Price price)
-        {
-            var result = new Amount();
-
-            foreach (var commodity in amount.Commodities)
+            if (commodity == price.From)
             {
-                if (commodity == price.From)
-                {
-                    result.Add(price.To, price.Rate * amount[commodity]);
-                }
-                else
-                {
-                    result.Add(commodity, amount[commodity]);
-                }
+                result.Add(price.To, price.Rate * amount[commodity]);
             }
-
-            return result;
+            else
+            {
+                result.Add(commodity, amount[commodity]);
+            }
         }
 
-        public static Amount operator *(Price price, Amount amount) {
-            return amount * price;
-        }
+        return result;
+    }
+
+    public static Amount operator *(Price price, Amount amount)
+    {
+        return amount * price;
     }
 }

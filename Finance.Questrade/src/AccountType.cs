@@ -1,10 +1,9 @@
-namespace Finance.Questrade
+namespace Finance.Questrade;
+
+public enum AccountType
 {
-    public enum AccountType
-    {
-        IndividualRRSP,
-        IndividualTFSA,
-        IndividualMargin,
-        IndividualFHSA,
-    }
+    IndividualRRSP,
+    IndividualTFSA,
+    IndividualMargin,
+    IndividualFHSA,
 }

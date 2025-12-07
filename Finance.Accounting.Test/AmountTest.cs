@@ -1,58 +1,41 @@
 using System.Linq;
+using System.Threading.Tasks;
 using CsCheck;
-using NUnit.Framework;
 
 namespace Finance.Accounting.Test;
 
+
 public class AmountTest
 {
-    Gen<Amount> _amountGen;
-
-    [SetUp]
-    public void Setup()
-    {
-        _amountGen = Gen.Dictionary(Gen.String[1, 2], Gen.Decimal)
-            .Select(x =>
-            {
-                var amount = new Amount();
-                foreach (var entry in x)
-                {
-                    amount.Add(entry.Key, entry.Value);
-                }
-
-                return amount;
-            });
-    }
-
     [Test]
-    public void AlwaysHasValue()
+    public async Task AlwaysHasValue()
     {
-        Gen.String[1, 5].Sample(commodity =>
+        await Gen.String[1, 5].SampleAsync(async commodity =>
         {
             var amount = new Amount();
 
-            Assert.That(amount[commodity], Is.Zero);
+            await Assert.That(amount[commodity]).IsEqualTo(0);
         });
     }
 
     [Test]
-    public void Negation()
+    public async Task Negation()
     {
-        _amountGen.Sample(amount =>
+        await FinanceGen.Amount.SampleAsync(async amount =>
         {
             var negation = -amount;
 
             foreach (var commodity in amount.Commodities)
             {
-                Assert.That(negation[commodity], Is.EqualTo(-amount[commodity]));
+                await Assert.That(negation[commodity]).IsEqualTo(-amount[commodity]);
             }
         });
     }
 
     [Test]
-    public void Addition()
+    public async Task Addition()
     {
-        _amountGen.Array[2].Sample(amounts =>
+        await FinanceGen.Amount.Array[2].SampleAsync(async amounts =>
         {
             var left = amounts[0];
             var right = amounts[1];
@@ -61,15 +44,15 @@ public class AmountTest
 
             foreach (var commodity in left.Commodities.Union(right.Commodities))
             {
-                Assert.That(total[commodity], Is.EqualTo(left[commodity] + right[commodity]));
+                await Assert.That(total[commodity]).IsEqualTo(left[commodity] + right[commodity]);
             }
         });
     }
 
     [Test]
-    public void Subtraction()
+    public async Task Subtraction()
     {
-        _amountGen.Array[2].Sample(amounts =>
+        await FinanceGen.Amount.Array[2].SampleAsync(async amounts =>
         {
             var left = amounts[0];
             var right = amounts[1];
@@ -78,22 +61,22 @@ public class AmountTest
 
             foreach (var commodity in left.Commodities.Union(right.Commodities))
             {
-                Assert.That(total[commodity], Is.EqualTo(left[commodity] - right[commodity]));
+                await Assert.That(total[commodity]).IsEqualTo(left[commodity] - right[commodity]);
             }
         });
     }
 
     [Test]
-    public void Multiplication()
+    public async Task Multiplication()
     {
-        Gen.Select(_amountGen, Gen.Decimal[-100, 100])
-            .Sample((amount, factor) =>
+        await Gen.Select(FinanceGen.Amount, Gen.Decimal[-100, 100])
+            .SampleAsync(async (amount, factor) =>
             {
                 var total = amount * factor;
 
                 foreach (var commodity in amount.Commodities)
                 {
-                    Assert.That(total[commodity], Is.EqualTo(amount[commodity] * factor));
+                    await Assert.That(total[commodity]).IsEqualTo(amount[commodity] * factor);
                 }
             });
     }

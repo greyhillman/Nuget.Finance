@@ -2,93 +2,92 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Finance.JSON
-{
-    public class AccountFlowConverter : JsonConverter<AccountFlow>
-    {
-        private readonly JsonConverter<Account> _accountConverter;
-        private readonly JsonConverter<Amount> _amountConverter;
+namespace Finance.Accounting.JSON;
 
-        public AccountFlowConverter(JsonConverter<Account> accountConverter, JsonConverter<Amount> amountsConverter)
+public class AccountFlowConverter : JsonConverter<AccountFlow>
+{
+    private readonly JsonConverter<Account> _accountConverter;
+    private readonly JsonConverter<Amount> _amountConverter;
+
+    public AccountFlowConverter(JsonConverter<Account> accountConverter, JsonConverter<Amount> amountsConverter)
+    {
+        _accountConverter = accountConverter;
+        _amountConverter = amountsConverter;
+    }
+
+    public override AccountFlow? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.StartArray)
         {
-            _accountConverter = accountConverter;
-            _amountConverter = amountsConverter;
+            throw new JsonException();
         }
 
-        public override AccountFlow? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        var flow = new AccountFlow();
+
+        while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
         {
-            if (reader.TokenType != JsonTokenType.StartArray)
+            if (reader.TokenType != JsonTokenType.StartObject)
             {
                 throw new JsonException();
             }
 
-            var flow = new AccountFlow();
+            Account? from = null;
+            Account? to = null;
+            Amount? amount = null;
 
-            while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
+            while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {
-                if (reader.TokenType != JsonTokenType.StartObject)
+                var propertyName = reader.GetString();
+                reader.Read();
+
+                switch (propertyName)
                 {
-                    throw new JsonException();
-                }
-
-                Account? from = null;
-                Account? to = null;
-                Amount? amount = null;
-
-                while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
-                {
-                    var propertyName = reader.GetString();
-                    reader.Read();
-
-                    switch (propertyName)
-                    {
-                        case "from":
-                            from = _accountConverter.Read(ref reader, typeof(Account), options);
-                            break;
-                        case "to":
-                            to = _accountConverter.Read(ref reader, typeof(Account), options);
-                            break;
-                        case "amounts":
-                            amount = _amountConverter.Read(ref reader, typeof(Amount), options);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                if (from.HasValue && to.HasValue && amount != null)
-                {
-                    flow.Add(new Movement(from.Value, to.Value, amount));
+                    case "from":
+                        from = _accountConverter.Read(ref reader, typeof(Account), options);
+                        break;
+                    case "to":
+                        to = _accountConverter.Read(ref reader, typeof(Account), options);
+                        break;
+                    case "amounts":
+                        amount = _amountConverter.Read(ref reader, typeof(Amount), options);
+                        break;
+                    default:
+                        break;
                 }
             }
 
-            return flow;
+            if (from.HasValue && to.HasValue && amount != null)
+            {
+                flow.Add(new Movement(from.Value, to.Value, amount));
+            }
         }
 
-        public override void Write(Utf8JsonWriter writer, AccountFlow value, JsonSerializerOptions options)
+        return flow;
+    }
+
+    public override void Write(Utf8JsonWriter writer, AccountFlow value, JsonSerializerOptions options)
+    {
+        writer.WriteStartArray();
+
+        foreach (var source in value.Sources)
         {
-            writer.WriteStartArray();
-
-            foreach (var source in value.Sources)
+            foreach (var sink in value.GetSinks(source))
             {
-                foreach (var sink in value.GetSinks(source))
-                {
-                    writer.WriteStartObject();
+                writer.WriteStartObject();
 
-                    writer.WritePropertyName("from");
-                    _accountConverter.Write(writer, source, options);
+                writer.WritePropertyName("from");
+                _accountConverter.Write(writer, source, options);
 
-                    writer.WritePropertyName("to");
-                    _accountConverter.Write(writer, sink, options);
+                writer.WritePropertyName("to");
+                _accountConverter.Write(writer, sink, options);
 
-                    writer.WritePropertyName("amounts");
-                    _amountConverter.Write(writer, value.GetFlows(source, sink), options);
+                writer.WritePropertyName("amounts");
+                _amountConverter.Write(writer, value.GetFlows(source, sink), options);
 
-                    writer.WriteEndObject();
-                }
+                writer.WriteEndObject();
             }
-
-            writer.WriteEndArray();
         }
+
+        writer.WriteEndArray();
     }
 }

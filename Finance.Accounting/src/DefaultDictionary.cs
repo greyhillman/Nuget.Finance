@@ -3,99 +3,98 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Finance
+namespace Finance;
+
+public class DefaultDictionary<K, V> : IDictionary<K, V> where K : notnull
 {
-    public class DefaultDictionary<K, V> : IDictionary<K, V> where K : notnull
+    private readonly IDictionary<K, V> _base;
+    private readonly Func<V> _gen;
+
+    public DefaultDictionary(Func<V> gen)
     {
-        private readonly IDictionary<K, V> _base;
-        private readonly Func<V> _gen;
+        _base = new Dictionary<K, V>();
+        _gen = gen;
+    }
 
-        public DefaultDictionary(Func<V> gen)
+    public V this[K key]
+    {
+        get
         {
-            _base = new Dictionary<K, V>();
-            _gen = gen;
-        }
-
-        public V this[K key]
-        {
-            get
+            if (!_base.ContainsKey(key))
             {
-                if (!_base.ContainsKey(key))
-                {
-                    // It makes the dictionary easier to work with if we
-                    // set the newly generated value.
-                    this[key] = _gen();
-                }
-
-                return _base[key];
+                // It makes the dictionary easier to work with if we
+                // set the newly generated value.
+                this[key] = _gen();
             }
-            set
-            {
-                _base[key] = value;
-            }
+
+            return _base[key];
         }
-
-        public ICollection<K> Keys => _base.Keys;
-
-        public ICollection<V> Values => _base.Values;
-
-        public int Count => _base.Count;
-
-        public bool IsReadOnly => _base.IsReadOnly;
-
-        public void Add(K key, V value)
+        set
         {
-            _base.Add(key, value);
+            _base[key] = value;
         }
+    }
 
-        public void Add(KeyValuePair<K, V> item)
-        {
-            _base.Add(item);
-        }
+    public ICollection<K> Keys => _base.Keys;
 
-        public void Clear()
-        {
-            _base.Clear();
-        }
+    public ICollection<V> Values => _base.Values;
 
-        public bool Contains(KeyValuePair<K, V> item)
-        {
-            return _base.Contains(item);
-        }
+    public int Count => _base.Count;
 
-        public bool ContainsKey(K key)
-        {
-            return _base.ContainsKey(key);
-        }
+    public bool IsReadOnly => _base.IsReadOnly;
 
-        public void CopyTo(KeyValuePair<K, V>[] array, int arrayIndex)
-        {
-            _base.CopyTo(array, arrayIndex);
-        }
+    public void Add(K key, V value)
+    {
+        _base.Add(key, value);
+    }
 
-        public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
-        {
-            return _base.GetEnumerator();
-        }
+    public void Add(KeyValuePair<K, V> item)
+    {
+        _base.Add(item);
+    }
 
-        public bool Remove(K key)
-        {
-            return _base.Remove(key);
-        }
+    public void Clear()
+    {
+        _base.Clear();
+    }
 
-        public bool Remove(KeyValuePair<K, V> item)
-        {
-            return _base.Remove(item);
-        }
+    public bool Contains(KeyValuePair<K, V> item)
+    {
+        return _base.Contains(item);
+    }
 
-        public bool TryGetValue(K key, [MaybeNullWhen(false)] out V value)
-        {
-            return _base.TryGetValue(key, out value);
-        }
+    public bool ContainsKey(K key)
+    {
+        return _base.ContainsKey(key);
+    }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _base.GetEnumerator();
-        }
+    public void CopyTo(KeyValuePair<K, V>[] array, int arrayIndex)
+    {
+        _base.CopyTo(array, arrayIndex);
+    }
+
+    public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
+    {
+        return _base.GetEnumerator();
+    }
+
+    public bool Remove(K key)
+    {
+        return _base.Remove(key);
+    }
+
+    public bool Remove(KeyValuePair<K, V> item)
+    {
+        return _base.Remove(item);
+    }
+
+    public bool TryGetValue(K key, [MaybeNullWhen(false)] out V value)
+    {
+        return _base.TryGetValue(key, out value);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _base.GetEnumerator();
     }
 }

@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance.Accounting.JSON", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance.Accounting.Test", "Finance.Accounting.Test\Finance.Accounting.Test.csproj", "{0AFF9118-5ECB-4B1D-884F-5EA4DE9E196F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finance.Accounting.JSON.Test", "Finance.Accounting.JSON.Test\Finance.Accounting.JSON.Test.csproj", "{5ABC9791-C81C-45E5-9EE3-D6F0E701078A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +62,9 @@ Global
 		{0AFF9118-5ECB-4B1D-884F-5EA4DE9E196F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AFF9118-5ECB-4B1D-884F-5EA4DE9E196F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AFF9118-5ECB-4B1D-884F-5EA4DE9E196F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5ABC9791-C81C-45E5-9EE3-D6F0E701078A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ABC9791-C81C-45E5-9EE3-D6F0E701078A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ABC9791-C81C-45E5-9EE3-D6F0E701078A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5ABC9791-C81C-45E5-9EE3-D6F0E701078A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

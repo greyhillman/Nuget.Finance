@@ -1,49 +1,48 @@
 using System.Collections.Generic;
 
-namespace Finance
+namespace Finance.Accounting;
+
+public class AccountFlow
 {
-    public class AccountFlow
+    private readonly DefaultDictionary<Account, DefaultDictionary<Account, Amount>> _forward;
+    private readonly DefaultDictionary<Account, DefaultDictionary<Account, Amount>> _backward;
+
+    public ICollection<Account> Sources => _forward.Keys;
+    public ICollection<Account> Sinks => _backward.Keys;
+
+    public AccountFlow()
     {
-        private readonly DefaultDictionary<Account, DefaultDictionary<Account, Amount>> _forward;
-        private readonly DefaultDictionary<Account, DefaultDictionary<Account, Amount>> _backward;
-
-        public ICollection<Account> Sources => _forward.Keys;
-        public ICollection<Account> Sinks => _backward.Keys;
-
-        public AccountFlow()
+        _forward = new DefaultDictionary<Account, DefaultDictionary<Account, Amount>>(() =>
         {
-            _forward = new DefaultDictionary<Account, DefaultDictionary<Account, Amount>>(() =>
-            {
-                return new DefaultDictionary<Account, Amount>(() => new());
-            });
-            _backward = new DefaultDictionary<Account, DefaultDictionary<Account, Amount>>(() =>
-            {
-                return new DefaultDictionary<Account, Amount>(() => new());
-            });
-        }
-
-        public void Add(Movement movement)
+            return new DefaultDictionary<Account, Amount>(() => new());
+        });
+        _backward = new DefaultDictionary<Account, DefaultDictionary<Account, Amount>>(() =>
         {
-            var from = movement.From;
-            var to = movement.To;
+            return new DefaultDictionary<Account, Amount>(() => new());
+        });
+    }
 
-            _forward[from][to] += movement.Amount;
-            _backward[to][from] += movement.Amount;
-        }
+    public void Add(Movement movement)
+    {
+        var from = movement.From;
+        var to = movement.To;
 
-        public IEnumerable<Account> GetSinks(Account from)
-        {
-            return _forward[from].Keys;
-        }
+        _forward[from][to] += movement.Amount;
+        _backward[to][from] += movement.Amount;
+    }
 
-        public IEnumerable<Account> GetSources(Account to)
-        {
-            return _backward[to].Keys;
-        }
+    public IEnumerable<Account> GetSinks(Account from)
+    {
+        return _forward[from].Keys;
+    }
 
-        public Amount GetFlows(Account from, Account to)
-        {
-            return _forward[from][to];
-        }
+    public IEnumerable<Account> GetSources(Account to)
+    {
+        return _backward[to].Keys;
+    }
+
+    public Amount GetFlows(Account from, Account to)
+    {
+        return _forward[from][to];
     }
 }

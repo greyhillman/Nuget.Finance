@@ -3,61 +3,61 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Finance.JSON
+namespace Finance.Accounting.JSON;
+
+public class ObjectBalanceConverter : JsonConverter<Balance>
 {
-    public class ObjectBalanceConverter : JsonConverter<Balance>
+    private readonly JsonConverter<Account> _accountConverter;
+    private readonly JsonConverter<Amount> _amountConverter;
+
+    public ObjectBalanceConverter(JsonConverter<Account> accountConverter, JsonConverter<Amount> amountsConverter)
     {
-        private readonly JsonConverter<Account> _accountConverter;
-        private readonly JsonConverter<Amount> _amountConverter;
+        _accountConverter = accountConverter;
+        _amountConverter = amountsConverter;
+    }
 
-        public ObjectBalanceConverter(JsonConverter<Account> accountConverter, JsonConverter<Amount> amountsConverter)
+    public override Balance? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var lookup = new DefaultDictionary<Account, Amount>(() => new());
+        var accounts = new AccountTree();
+
+        reader.AssertStartObject();
+        while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
         {
-            _accountConverter = accountConverter;
-            _amountConverter = amountsConverter;
+            var account = _accountConverter.ReadAsPropertyName(ref reader, typeof(Account), options);
+            reader.Read();
+
+            accounts.Add(account);
+
+            var amount = _amountConverter.Read(ref reader, typeof(Amount), options);
+
+            lookup[account] = amount!;
+        }
+        reader.AssertEndObject();
+
+        var balance = new Balance();
+        foreach (var account in accounts.EnumerateUp())
+        {
+            var diff = lookup[account] - balance[account];
+
+            balance.Add(account, diff);
         }
 
-        public override Balance? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        return balance;
+    }
+
+    public override void Write(Utf8JsonWriter writer, Balance value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+
+        foreach (var account in value.Accounts.OrderBy(x => x))
         {
-            reader.AssertStartObject();
+            var amount = value[account];
 
-            var balance = new Balance();
-
-            while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
-            {
-                var account = _accountConverter.ReadAsPropertyName(ref reader, typeof(Account), options);
-                reader.Read();
-
-                var amount = _amountConverter.Read(ref reader, typeof(Amount), options);
-
-                balance.Add(account, amount);
-
-                // Avoid double counting parent amounts
-                while (account.Parent != account)
-                {
-                    balance.Add(account.Parent, -amount);
-
-                    account = account.Parent;
-                }
-            }
-
-            reader.AssertEndObject();
-
-            return balance;
+            _accountConverter.WriteAsPropertyName(writer, account, options);
+            _amountConverter.Write(writer, amount, options);
         }
 
-        public override void Write(Utf8JsonWriter writer, Balance value, JsonSerializerOptions options)
-        {
-            writer.WriteStartObject();
-
-            foreach (var account in value.Accounts.OrderBy(x => x))
-            {
-                var amount = value[account];
-
-                _accountConverter.WriteAsPropertyName(writer, account, options);
-                _amountConverter.Write(writer, amount, options);
-            }
-
-            writer.WriteEndObject();
-        }
+        writer.WriteEndObject();
     }
 }

@@ -1,59 +1,62 @@
-using System;
+using System.Threading.Tasks;
 using CsCheck;
-using NUnit.Framework;
 
 namespace Finance.Accounting.Test;
+
 
 public class AccountTest
 {
     [Test]
-    public void Parent()
+    public async Task Parent()
     {
-        var accountGen =
-            from branch in Gen.String.Array.Nonempty
-            select new Account(branch);
-        
-        accountGen.Sample(account =>
+        await FinanceGen.Account.NonRoot.SampleAsync(async account =>
         {
             var parent = account.Parent;
 
-            Assert.That(parent, Is.Not.EqualTo(account));
-            Assert.That(account.IsUnder(parent));
+            await Assert.That(parent).IsNotEqualTo(account);
+            await Assert.That(account.IsUnder(parent)).IsTrue();
         });
     }
 
     [Test]
-    public void RootParent()
+    public async Task AccountIsUnderItself()
+    {
+        await FinanceGen.Account.SampleAsync(async account =>
+        {
+            await Assert.That(account.IsUnder(account)).IsTrue();
+        });
+    }
+
+    [Test]
+    public async Task RootParent()
     {
         var root = new Account();
-        Assert.That(root.Depth, Is.EqualTo(0));
+        await Assert.That(root.Depth).IsEqualTo(0);
 
         var parent = root.Parent;
-        Assert.That(parent, Is.EqualTo(root));
+        await Assert.That(parent).IsEqualTo(root);
     }
 
     [Test]
-    public void Equality()
+    public async Task Equality()
     {
-        Gen.String[0, 5].Array.Sample(branch =>
+        await Gen.String[0, 5].Array.SampleAsync(async branches =>
         {
-            Assert.That(branch, Is.All.Not.Null);
+            var left = new Account(branches);
+            var right = new Account(branches);
 
-            var left = new Account(branch);
-            var right = new Account(branch);
-
-            Assert.That(left, Is.EqualTo(right));
+            await Assert.That(left).IsEqualTo(right);
         });
     }
 
     [Test]
-    public void DepthIsNotNegative()
+    public async Task DepthIsNotNegative()
     {
-        Gen.String.Array[0, 5].Sample(branch =>
+        await Gen.String.Array[0, 5].SampleAsync(async branch =>
         {
             var account = new Account(branch);
 
-            Assert.That(account.Depth, Is.EqualTo(branch.Length));
+            await Assert.That(account.Depth).IsEqualTo(branch.Length);
         });
     }
 }

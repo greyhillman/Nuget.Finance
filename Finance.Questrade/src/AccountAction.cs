@@ -1,9 +1,10 @@
-namespace Finance.Questrade
+namespace Finance.Questrade;
+
+public enum AccountAction
 {
-    public enum AccountAction
-    {
-        Buy,
-        Contribute,
-        Deposit,
-    }
+    Buy,
+    Contribute,
+    Deposit,
+    Withdraw,
+    Sell,
 }

@@ -1,133 +1,140 @@
 using System;
 
-namespace Finance
+namespace Finance.Accounting;
+
+/// <remarks>
+/// An account can be thought of as a list of strings.
+/// </remarks>
+public readonly struct Account : IEquatable<Account>, IComparable<Account>
 {
-    public readonly struct Account : IEquatable<Account>, IComparable<Account>
+    private readonly string[] _branch;
+
+    public Account()
     {
-        private readonly string[] _branch;
+        _branch = Array.Empty<string>();
+    }
 
-        public Account()
+    public Account(params string[] branch)
+        : this()
+    {
+        if (branch == null)
         {
-            _branch = Array.Empty<string>();
+            throw new ArgumentException();
         }
 
-        public Account(params string[] branch)
-            : this()
+        _branch = branch;
+    }
+
+    public string[] Branch => _branch;
+
+    public int Depth => _branch.Length;
+
+    public Account Parent
+    {
+        get
         {
-            if (branch == null)
+            if (_branch.Length == 0)
             {
-                throw new ArgumentException();
+                return this;
             }
 
-            _branch = branch;
+            var parent_length = _branch.Length - 1;
+            var parent_branch = _branch.AsSpan(0, parent_length).ToArray();
+
+            return new Account(parent_branch);
+        }
+    }
+
+    public override string ToString()
+    {
+        return string.Join(":", _branch);
+    }
+
+    public bool IsUnder(Account parent)
+    {
+        if (parent.Branch.Length > this.Branch.Length)
+        {
+            return false;
         }
 
-        public string[] Branch => _branch;
-
-        public int Depth => _branch.Length;
-
-        public Account Parent
+        for (var i = 0; i < parent.Branch.Length; i++)
         {
-            get
-            {
-                if (_branch.Length == 0)
-                {
-                    return this;
-                }
-
-                var parent_length = _branch.Length - 1;
-                var parent_branch = _branch.AsSpan(0, parent_length).ToArray();
-
-                return new Account(parent_branch);
-            }
-        }
-
-        public override string ToString()
-        {
-            return string.Join(":", _branch);
-        }
-
-        public bool IsUnder(Account parent)
-        {
-            if (parent.Branch.Length >= this.Branch.Length)
+            if (parent.Branch[i] != Branch[i])
             {
                 return false;
             }
-
-            for (var i = 0; i < parent.Branch.Length; i++)
-            {
-                if (parent.Branch[i] != Branch[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
-        public static bool operator ==(Account first, Account other)
+        return true;
+    }
+
+    public static bool operator ==(Account first, Account other)
+    {
+        return first.Equals(other);
+    }
+
+    public static bool operator !=(Account first, Account other)
+    {
+        return !first.Equals(other);
+    }
+
+    public bool Equals(Account other)
+    {
+        if (other._branch.Length != this._branch.Length)
         {
-            return first.Equals(other);
+            return false;
         }
 
-        public static bool operator !=(Account first, Account other)
+        for (var i = 0; i < _branch.Length; i++)
         {
-            return !first.Equals(other);
-        }
-
-        public bool Equals(Account other)
-        {
-            if (other._branch.Length != this._branch.Length)
+            if (other.Branch[i] != Branch[i])
             {
                 return false;
             }
-
-            for (var i = 0; i < _branch.Length; i++)
-            {
-                if (other.Branch[i] != Branch[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
-        public override int GetHashCode()
-        {
-            var hashCode = 0;
-            foreach (var part in _branch)
-            {
-                hashCode ^= part.GetHashCode();
-            }
+        return true;
+    }
 
-            return hashCode;
+    public override bool Equals(object? obj)
+    {
+        return obj is Account account && Equals(account);
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = 0;
+        foreach (var part in _branch)
+        {
+            hashCode ^= part.GetHashCode();
         }
 
-        public int CompareTo(Account other)
+        return hashCode;
+    }
+
+    public int CompareTo(Account other)
+    {
+        for (var i = 0; ; i++)
         {
-            for (var i = 0; ; i++)
+            if (i < this.Branch.Length && i < other.Branch.Length)
             {
-                if (i < this.Branch.Length && i < other.Branch.Length)
+                var order = string.Compare(this.Branch[i], other.Branch[i], StringComparison.Ordinal);
+                if (order != 0)
                 {
-                    var order = string.Compare(this.Branch[i], other.Branch[i], StringComparison.Ordinal);
-                    if (order != 0)
-                    {
-                        return order;
-                    }
+                    return order;
                 }
-                else if (i < this.Branch.Length)
-                {
-                    return 1;
-                }
-                else if (i < other.Branch.Length)
-                {
-                    return -1;
-                }
-                else
-                {
-                    return 0;
-                }
+            }
+            else if (i < this.Branch.Length)
+            {
+                return 1;
+            }
+            else if (i < other.Branch.Length)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
             }
         }
     }

@@ -1,9 +1,9 @@
-namespace Finance.Questrade
+namespace Finance.Questrade;
+
+public enum ActivityType
 {
-    public enum ActivityType
-    {
-        Dividends,
-        Trades,
-        Deposits,
-    }
+    Dividends,
+    Trades,
+    Deposits,
+    Withdrawals,
 }

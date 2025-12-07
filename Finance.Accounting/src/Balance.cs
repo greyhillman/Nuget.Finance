@@ -1,56 +1,67 @@
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Net.Http.Headers;
 
-namespace Finance
+namespace Finance.Accounting;
+
+/// <summary>
+/// A total mapping from accounts to amounts.
+/// </summary>
+public class Balance : IEquatable<Balance>
 {
-    public class Balance
+    private readonly DefaultDictionary<Account, Amount> _lookup;
+
+    public ICollection<Account> Accounts => _lookup.Keys;
+
+    public Balance()
     {
-        private readonly DefaultDictionary<Account, Amount> _lookup;
+        _lookup = new(() => new());
+    }
 
-        public ICollection<Account> Accounts => _lookup.Keys;
-
-        public Balance()
+    public Balance(Balance initial)
+        : this()
+    {
+        foreach (var pair in initial._lookup)
         {
-            _lookup = new(() => new());
-        }
-
-        public Balance(Balance initial)
-            : this()
-        {
-            foreach (var pair in initial._lookup)
-            {
-                _lookup.Add(pair);
-            }
-        }
-
-        public void Add(Account account, Amount amount)
-        {
-            _lookup[account] += amount;
-
-            if (account.Parent != account)
-            {
-                Add(account.Parent, amount);
-            }
-        }
-
-        public Amount this[Account account]
-        {
-            get => _lookup[account];
-        }
-
-        public static Balance operator +(Balance left, Balance right)
-        {
-            var result = new Balance(left);
-
-            foreach (var account in right.Accounts)
-            {
-                var amount = right[account];
-
-                result.Add(account, amount);
-            }
-
-            return result;
+            _lookup.Add(pair);
         }
     }
+
+    public void Add(Account account, Amount amount)
+    {
+        _lookup[account] += amount;
+
+        if (account.Parent != account)
+        {
+            Add(account.Parent, amount);
+        }
+    }
+
+    public bool Equals(Balance? other)
+    {
+        if (other == null)
+        {
+            throw new ArgumentException("null", nameof(other));
+        }
+
+        return _lookup.Equals(other._lookup);
+    }
+
+    public Amount this[Account account]
+    {
+        get => _lookup[account];
+    }
+
+    //         public static Balance operator +(Balance left, Balance right)
+    //         {
+    //             var result = new Balance(left);
+    // 
+    //             foreach (var account in right.Accounts)
+    //             {
+    //                 var amount = right[account];
+    // 
+    //                 result.Add(account, amount);
+    //             }
+    // 
+    //             return result;
+    //         }
 }

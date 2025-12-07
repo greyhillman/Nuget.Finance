@@ -2,89 +2,99 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 
-namespace Finance
+namespace Finance.Accounting;
+
+public class AccountTree
 {
-    public class AccountTree : IEnumerable<Account>
+    private readonly string[] _prefix;
+    private readonly SortedDictionary<string, AccountTree> _children;
+
+    public AccountTree()
     {
-        private readonly Dictionary<string, AccountTree> _children;
+        _prefix = [];
+        _children = new();
+    }
 
-        public AccountTree()
+    private AccountTree(string[] prefix, string child)
+    {
+        _prefix = [.. prefix, child];
+        _children = new();
+    }
+
+    public void Add(Account account)
+    {
+        Add(account.Branch);
+    }
+
+    private void Add(string[] account)
+    {
+        if (account.Length == 0)
         {
-            _children = new();
+            return;
         }
 
-        public void Add(Account account)
+        var childRoot = account[0];
+
+        if (!_children.ContainsKey(childRoot))
         {
-            Add(account.Branch);
+            _children[childRoot] = new AccountTree(_prefix, childRoot);
         }
 
-        private void Add(string[] account)
+        _children[childRoot].Add(account[1..]);
+    }
+
+    public AccountTree GetUnder(Account parent)
+    {
+        var branch = parent.Branch;
+
+        var tree = this;
+        for (var depth = 0; depth < branch.Length; depth++)
         {
-            if (account.Length == 0)
+            var topAccount = branch[depth];
+            if (tree._children.ContainsKey(topAccount))
             {
-                return;
+                tree = tree._children[topAccount];
+                continue;
             }
-
-            var childRoot = account[0];
-
-            if (!_children.ContainsKey(childRoot))
+            else
             {
-                _children[childRoot] = new AccountTree();
-            }
-
-            _children[childRoot].Add(account[1..]);
-        }
-
-        public IEnumerable<Account> GetUnder(Account parent)
-        {
-            var branch = parent.Branch;
-
-            var tree = this;
-            for (var depth = 0; depth < branch.Length; depth++)
-            {
-                var topAccount = branch[depth];
-                if (tree._children.ContainsKey(topAccount))
-                {
-                    tree = tree._children[topAccount];
-                    continue;
-                }
-                else
-                {
-                    tree = new AccountTree();
-                    break;
-                }
-            }
-
-            yield return parent;
-            foreach (var child in tree)
-            {
-                var account = parent.Branch.Concat(child.Branch).ToArray();
-
-                yield return new Account(account);
+                tree = new AccountTree();
+                break;
             }
         }
 
-        public IEnumerator<Account> GetEnumerator()
+        return tree;
+    }
+
+    public IEnumerable<Account> EnumerateDown()
+    {
+        var topAccounts = _children.Keys;
+
+        foreach (var topAccount in topAccounts)
         {
-            var topAccounts = _children.Keys.OrderBy(x => x);
+            yield return new Account([.. _prefix, topAccount]);
 
-            foreach (var topAccount in topAccounts)
+            foreach (var child in _children[topAccount].EnumerateDown())
             {
-                yield return new Account(topAccount);
-
-                foreach (var child in _children[topAccount])
-                {
-                    var account = new[] { topAccount }.Concat(child.Branch).ToArray();
-
-                    yield return new Account(account);
-                }
+                yield return child;
             }
         }
+    }
 
-        IEnumerator IEnumerable.GetEnumerator()
+    public IEnumerable<Account> EnumerateUp()
+    {
+        var topAccounts = _children.Keys;
+
+        foreach (var topAccount in topAccounts)
         {
-            return this.GetEnumerator();
+            foreach (var child in _children[topAccount].EnumerateUp())
+            {
+                yield return child;
+            }
+
+            yield return new Account([.. _prefix, topAccount]);
         }
     }
 }
